@@ -13,6 +13,7 @@ router
     .get(getAllUsers)
     .post(createUser);
 
+
 router 
     .route('/:id')
     .get(getUserByID)
