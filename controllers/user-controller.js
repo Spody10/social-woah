@@ -1,10 +1,10 @@
 const { User } = require('../models');
 
 const userController = {
-    // gets all the users
+    // get all users
     getAllUsers(req, res) {
         User.find({})
-        .select('__v')
+        .select('-__v')
         .then(dbUserData => res.json(dbUserData))
         .catch(err => {
             console.log(err);
@@ -49,21 +49,24 @@ const userController = {
         .catch(err => res.status(400).json(err));
     },
 
-    // delete user
+    // delete users
     deleteUser({ params }, res) {
         User.findOneAndDelete({ _id: params.id })
-        .then(dbUserData => {
-            if (!dbUserData) {
-                res.status(404).json({ message: 'User not found with this id.' });
-                return;
-            }
-            res.json(dbUserData);
-        })
-        .catch(err => res.status(400).json(err));
+            .then(dbUserData => {
+                if (!dbUserData) {
+                    res.status(404).json({ message: 'User not found with this id.' });
+                    return;
+                }
+                return Thought.deleteMany({ username: dbUserData.username });                
+            })
+            .then(() => {
+                res.json({ message: 'User and thoughts removed.' });
+            })
+            .catch(err => res.status(400).json(err));
     },
-
+    
     // add friend
-    addFriend({ params }, rfes) {
+    addFriend({ params }, res) {
         User.findOneAndUpdate(
             { _id: params.userId },
             { $push: { friends: params.friendId } },
